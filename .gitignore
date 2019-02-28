@@ -1,3 +1,4 @@
 *.html
 .vscode
 *.pyc
+__pycache__
