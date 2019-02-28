@@ -5,7 +5,9 @@ def cleanText(theText):
     return ''.join(c for c in theText if c not in '\r\t\n').strip()
 
 def getEnglishSentenseOnly(theText):
-    return re.sub("[^A-Za-z\S+]", "", theText.strip())
+    turn1 = re.sub("<.*?>", "", theText)
+    turn2 = re.sub("[^a-zA-Z0-9 +]", "", turn1.strip())
+    return turn2
 # def add(value1, value2):
 #     return value1 + value2
 

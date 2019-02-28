@@ -1,4 +1,5 @@
 import scrapy
+import json
 from tutorial.utils.helper import *
 
 ##This spider is for Ebay mobile only.
@@ -17,14 +18,23 @@ class MobilesSpider(scrapy.Spider):
 
     def parse(self, response):
         #/tr/td[contains(@width,"50%")/text()]
+        res = []
         items = response.xpath("//div[@class='itemAttr']/*/table/tr/td")
         for item in items:
             # label = item.xpath("//td[@class='attrLabels']/text()").get()
             itemTexts = item.xpath("text()").getall()
             for itemText in itemTexts:
                 clean = getEnglishSentenseOnly(itemText)
-                if clean and clean.upper() in (name.upper() for name in self.accLabels):
-                    print(clean)
+                if clean:
+                    if clean.upper() in (name.upper() for name in self.accLabels):
+                        res.append(clean)
+        
+        f = open("test.txt","w+")
+        for i in range(len(res)):
+            f.write(res[i]+"\r\n")
+        f.close()
+           
+
             
         # yield{
         #     'Brand': attribute.xpath("//tr/following-sibling::td[@class='attrLabels' and contains(.//test(),'Brand')]/td[contains(@width,'50%')/text()]").get(),
