@@ -18,21 +18,35 @@ class MobilesSpider(scrapy.Spider):
 
     def parse(self, response):
         #/tr/td[contains(@width,"50%")/text()]
-        res = []
+        res = {}
+        previousKey = ""
+        nextIsTarget = False
         items = response.xpath("//div[@class='itemAttr']/*/table/tr/td")
         for item in items:
             # label = item.xpath("//td[@class='attrLabels']/text()").get()
             itemTexts = item.xpath("text()").getall()
             for itemText in itemTexts:
+                if not itemText:
+                    continue
                 clean = getEnglishSentenseOnly(itemText)
                 if clean:
-                    if clean.upper() in (name.upper() for name in self.accLabels):
-                        res.append(clean)
+                    if nextIsTarget and previousKey:
+                        res[previousKey].append(clean)
+                        nextIsTarget = False
+                        previousKey = ""
+                    elif clean.upper() in (name.upper() for name in self.accLabels):
+                        res[clean] = []
+                        previousKey = clean
+                        nextIsTarget = True
+             
         
-        f = open("test.txt","w+")
-        for i in range(len(res)):
-            f.write(res[i]+"\r\n")
+        f = open("result.json","w+")
+        parsed = json.loads(res)
+        f.write(json.dumps(parsed, indent=4, sort_keys=True))
         f.close()
+        # for i in range(len(res)):
+        #     f.write(res[i]+"\r\n")
+        # f.close()
            
 
             
