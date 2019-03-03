@@ -23,26 +23,29 @@ class MobilesSpider(scrapy.Spider):
         nextIsTarget = False
         items = response.xpath("//div[@class='itemAttr']/*/table/tr/td")
         for item in items:
-            # label = item.xpath("//td[@class='attrLabels']/text()").get()
-            itemTexts = item.xpath("text()").getall()
-            for itemText in itemTexts:
-                if not itemText:
-                    continue
-                clean = getEnglishSentenseOnly(itemText)
-                if clean:
-                    if nextIsTarget and previousKey:
-                        res[previousKey].append(clean)
-                        nextIsTarget = False
-                        previousKey = ""
-                    elif clean.upper() in (name.upper() for name in self.accLabels):
-                        res[clean] = []
-                        previousKey = clean
-                        nextIsTarget = True
-             
+            itemText = item.get()
+            if not itemText:
+                continue
+            label = item.css(".attrLabels").get()
+            labelRes = getEnglishSentenseOnly(label)
         
+            if labelRes:
+                if labelRes.upper() in (name.upper() for name in self.accLabels):
+                    res[labelRes] = []
+                    previousKey = labelRes
+                    nextIsTarget = True
+                continue
+            
+            attribute = itemText
+            attributeRes = getEnglishSentenseOnly(attribute)
+            if attributeRes:
+                  if nextIsTarget and previousKey:
+                    res[previousKey].append(attributeRes)
+                    nextIsTarget = False
+                    previousKey = ""
+             
         f = open("result.json","w+")
-        parsed = json.loads(res)
-        f.write(json.dumps(parsed, indent=4, sort_keys=True))
+        f.write(json.dumps(res, indent=4, sort_keys=True))
         f.close()
         # for i in range(len(res)):
         #     f.write(res[i]+"\r\n")
